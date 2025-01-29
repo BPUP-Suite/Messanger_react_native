@@ -6,7 +6,7 @@
     "start": "electron .",
     "windows": "npx electron-builder --win",
     "linux": "npx electron-builder --linux",
-    "build": "electron-builder"
+    "build": "npx electron-builder"
   },
   "keywords": [],
   "author": {
