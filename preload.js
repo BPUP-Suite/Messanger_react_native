@@ -1,7 +1,6 @@
-const { ipcMain, BrowserWindow } = require('electron');
+const { contextBridge, ipcRenderer } = require('electron');
 
-contextBridge.exposeInMainWorld('electron', {
-  minimize: () => ipcRenderer.invoke('window-minimize'),
-  maximize: () => ipcRenderer.invoke('window-maximize'),
-  close: () => ipcRenderer.invoke('window-close'),
+// Esponi l'API per il renderer (pulsanti)
+contextBridge.exposeInMainWorld('ipcRender', {
+  send: (channel, data) => ipcRenderer.send(channel, data),
 });

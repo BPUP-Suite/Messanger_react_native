@@ -1,21 +1,24 @@
-const { app } = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const url = 'https://web.messanger.bpup.israiken.it';
+
+let mainWindow;
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
-    minWidth: 1200,
-    minHeight: 800,
+    minWidth: 600,
+    minHeight: 400,
     titleBarStyle: 'hiddenInset',
     frame: false,
+    resizable: true,
     title: 'BPUP Messenger',
     icon: path.join(__dirname, 'images', 'bpup_logo.png'),
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'), // Preload file per sicurezza
-      nodeIntegration: false,
-      contextIsolation: true, // Abilita contextIsolation per sicurezza
+      preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: false, // Sicurezza abilitata
+      contextIsolation: true, // Abilita  per sicurezza
     },
   });
 
@@ -40,10 +43,16 @@ function createWindow() {
         font-family: 'Arial', sans-serif;
         -webkit-app-region: drag; /* Rende la barra trascinabile */
       }
+      .custom-titlebar > div {
+        display: flex;
+        align-items: center;
+        justify-content: end;
+        width: auto;
+      }
       .custom-titlebar .title {
         flex-grow: 1;
         text-align: left;
-        font-family: 'Oswald', serif; /* Cambia il font del testo a sinistra */
+        font-family: 'Courier',monospace; /* Cambia il font del testo a sinistra */
       }
       .custom-titlebar button {
         background: none;
@@ -51,8 +60,13 @@ function createWindow() {
         color: white;
         font-size: 16px;
         cursor: pointer;
-        padding: 5px 10px;
+        padding: 5px 10px; /* Uniforma il padding su tutti i pulsanti */
         -webkit-app-region: no-drag; /* Esclude i pulsanti dalla regione trascinabile */
+        width: 40px; /* Imposta una larghezza fissa per tutti i pulsanti */
+        height: 30px; /* Imposta un'altezza fissa */
+        display: flex;
+        justify-content: center;
+        align-items: center;
       }
       .custom-titlebar button:hover { background: rgba(255, 255, 255, 0.2); }
       .content {
@@ -66,66 +80,49 @@ function createWindow() {
       titlebar.classList.add('custom-titlebar');
       titlebar.innerHTML = '<span class="title">BPUP Messenger</span>' +
                            '<div>' +
-                           '<button id="minimize-btn"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="18px" height="18px"><path d="M0 0h24v24H0z" fill="none"/><path d="M6 19h12v2H6z"/></svg></button>' +
-                           '<button id="maximize-btn"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="18px" height="18px"><path d="M0 0h24v24H0z" fill="none"/><path d="M3 5v14h18V5H3zm16 12H5V7h14v10z"/></svg></button>' +
-                           '<button id="close-btn"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="18px" height="18px"><path d="M0 0h24v24H0z" fill="none"/><path d="M6 18L18 6M6 6l12 12"/></svg></button>' +
+                           '<button id="minimize"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="18px" height="18px"><path d="M0 0h24v24H0z" fill="none"/><path d="M6 19h12v2H6z"/></svg></button>' +
+                           '<button id="maximize"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="18px" height="18px"><path d="M0 0h24v24H0z" fill="none"/><path d="M3 5v14h18V5H3zm16 12H5V7h14v10z"/></svg></button>' +
+                           '<button id="close"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="6 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="arcs"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>' +
                            '</div>';
       document.body.prepend(titlebar); // Prepend la barra al body della pagina
       document.body.classList.add('content');
-    `);
+  `);
 
-    // Aggiungi gli event listeners per i pulsanti
+    // Aggiungi gli event listeners ai pulsanti tramite IPC
     mainWindow.webContents.executeJavaScript(`
-      const { ipcRenderer } = require('electron');
-
-      // Aggiungi gli event listener per i pulsanti
-      document.getElementById('minimize-btn').addEventListener('click', () => {
-        ipcRenderer.send('window-minimize');
+      document.getElementById('minimize').addEventListener('click', () => {
+        window.ipcRender.send('window:minimize');
       });
 
-      document.getElementById('maximize-btn').addEventListener('click', () => {
-        ipcRenderer.send('window-maximize');
+      document.getElementById('maximize').addEventListener('click', () => {
+        window.ipcRender.send('window:maximize');
       });
 
-      document.getElementById('close-btn').addEventListener('click', () => {
-        ipcRenderer.send('window-close');
+      document.getElementById('close').addEventListener('click', () => {
+        window.ipcRender.send('window:close');
       });
     `);
+
   });
+  
+  // Gestione eventi IPC
+  ipcMain.on('window:minimize', () => {
+    mainWindow.minimize(); // Riduci a icona la finestra
+  });
+
+  ipcMain.on('window:maximize', () => {
+    if (mainWindow.isMaximized()) {
+      // Se la finestra è massimizzata, riducila
+      mainWindow.restore();
+    } else {
+      // Se la finestra non è massimizzata, massimizzala
+      mainWindow.maximize();
+    }
+  });
+
+  ipcMain.on('window:close', () => {
+    mainWindow.close(); // Chiudi la finestra
+  });
+
 }
-
 app.whenReady().then(createWindow);
-
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
-});
-
-app.on('activate', () => {
-  if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
-  }
-});
-
-// Gestisci le richieste per i pulsanti tramite ipcMain
-const { ipcMain, BrowserWindow } = require('electron');
-
-ipcMain.on('window-minimize', () => {
-  const currentWindow = BrowserWindow.getFocusedWindow();
-  currentWindow.minimize();
-});
-
-ipcMain.on('window-maximize', () => {
-  const currentWindow = BrowserWindow.getFocusedWindow();
-  if (currentWindow.isMaximized()) {
-    currentWindow.unmaximize();
-  } else {
-    currentWindow.maximize();
-  }
-});
-
-ipcMain.on('window-close', () => {
-  const currentWindow = BrowserWindow.getFocusedWindow();
-  currentWindow.close();
-});
