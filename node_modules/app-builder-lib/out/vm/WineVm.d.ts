@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { SpawnOptions, ExecFileOptions } from "child_process";
 import { ExtraSpawnOptions } from "builder-util";
 import { VmManager } from "./vm";

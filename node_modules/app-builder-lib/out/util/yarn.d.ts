@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { Lazy } from "lazy-val";
 import { Configuration } from "../configuration";
 import { NodeModuleDirInfo } from "./packageDependencies";

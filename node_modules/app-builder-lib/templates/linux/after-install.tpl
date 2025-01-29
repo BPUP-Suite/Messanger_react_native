@@ -10,13 +10,8 @@ else
     ln -sf '/opt/${sanitizedProductName}/${executable}' '/usr/bin/${executable}'
 fi
 
-# Check if user namespaces are supported by the kernel and working with a quick test:
-if ! { [[ -L /proc/self/ns/user ]] && unshare --user true; }; then
-    # Use SUID chrome-sandbox only on systems without user namespaces:
-    chmod 4755 '/opt/${sanitizedProductName}/chrome-sandbox' || true
-else
-    chmod 0755 '/opt/${sanitizedProductName}/chrome-sandbox' || true
-fi
+# SUID chrome-sandbox for Electron 5+
+chmod 4755 '/opt/${sanitizedProductName}/chrome-sandbox' || true
 
 if hash update-mime-database 2>/dev/null; then
     update-mime-database /usr/share/mime || true

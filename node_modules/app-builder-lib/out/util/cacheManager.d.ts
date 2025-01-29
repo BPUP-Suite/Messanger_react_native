@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { Arch } from "builder-util";
 import { Hash } from "crypto";
 export interface BuildCacheInfo {
