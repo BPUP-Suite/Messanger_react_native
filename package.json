@@ -1,0 +1,38 @@
+{
+  "name": "messanger_client-desktop",
+  "version": "0.0.2",
+  "main": "index.js",
+  "scripts": {
+    "start": "electron .",
+    "build:windows": "electron-builder --win",
+    "build:linux": "electron-builder --linux",
+    "dist": "electron-builder"
+  },
+  "keywords": [],
+  "author": {
+    "name": "BPUP",
+    "email": "bpup-suite@gmail.com"
+  },
+  "license": "BPUP",
+  "description": "A desktop client for the messanger",
+  "devDependencies": {
+    "electron": "^34.0.1",
+    "electron-packager": "^17.1.2",
+    "electron-builder": "^24.6.0"
+  },
+  "dependencies": {
+    "fs-extra": "^8.1.0"
+  },
+  "build": {
+    "appId": "com.messanger.wrapper",
+    "productName": "MessangerWrapper",
+    "copyright": "Copyright © 2025 BPUP",
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "maintainer": "bpup-suite@gmail.com",
+      "target": ["AppImage", "deb"]
+    }
+  }
+}
